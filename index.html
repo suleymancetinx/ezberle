@@ -1,450 +1,278 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="tr" class="dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Ezber Programı</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+<script>
+tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        primary: '#4edea3',
+        'primary-dim': '#10b981',
+        'on-primary': '#003824',
+        surface: '#0f0f0f',
+        'surface-card': '#1a1a1a',
+        'surface-high': '#242424',
+        'surface-highest': '#2e2e2e',
+        'on-surface': '#e5e2e1',
+        'on-surface-dim': '#8a8a8a',
+        border: 'rgba(255,255,255,0.08)',
+      },
+      fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
+      borderRadius: { '2xl': '1rem', '3xl': '1.5rem', '4xl': '2rem' },
+    }
+  }
+}
+</script>
 <style>
-  :root {
-    --bg: #0c0e14;
-    --surface: #141720;
-    --surface2: #1c2030;
-    --surface3: #222840;
-    --border: #2a3050;
-    --border2: #3a4468;
-    --accent: #5b7cfa;
-    --accent-dim: #2a3a7a;
-    --accent-glow: #5b7cfa33;
-    --text: #e4e8f5;
-    --text2: #8892b0;
-    --text3: #4a5470;
-    --green: #34d399;
-    --green-dim: #0d3320;
-    --amber: #fbbf24;
-    --red: #f87171;
-    --red-dim: #3a1010;
-    --radius: 10px;
-    --radius-lg: 16px;
-    --font: 'Segoe UI', system-ui, -apple-system, sans-serif;
-  }
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  html { font-size: 16px; }
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: var(--font);
-    min-height: 100vh;
-    padding: 0;
-  }
-
-  /* ── Layout ── */
-  .page {
-    max-width: 640px;
-    margin: 0 auto;
-    padding: 1.5rem 1rem 3rem;
-  }
-
-  /* ── Header ── */
-  .app-header {
-    text-align: center;
-    padding: 1.5rem 0 1.25rem;
-    border-bottom: 1px solid var(--border);
-    margin-bottom: 1.5rem;
-  }
-  .app-header .icon-wrap {
-    width: 48px; height: 48px;
-    background: var(--accent-dim);
-    border: 1px solid var(--accent);
-    border-radius: 12px;
-    display: flex; align-items: center; justify-content: center;
-    margin: 0 auto 0.75rem;
-    font-size: 22px;
-  }
-  .app-header h1 {
-    font-size: 1.5rem;
-    font-weight: 600;
-    color: var(--text);
-    letter-spacing: -0.3px;
-  }
-  .app-header p {
-    font-size: 0.82rem;
-    color: var(--text2);
-    margin-top: 4px;
-  }
-
-  /* ── Card ── */
-  .card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    padding: 1.25rem;
-    margin-bottom: 1rem;
-  }
-  .card-label {
-    font-size: 0.7rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    color: var(--text3);
-    margin-bottom: 0.875rem;
-  }
-
-  /* ── Form ── */
-  .field { display: flex; flex-direction: column; gap: 6px; }
-  .field label { font-size: 0.78rem; color: var(--text2); }
-  select, input[type="number"] {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    color: var(--text);
-    font-size: 0.9rem;
-    padding: 9px 12px;
-    width: 100%;
-    outline: none;
-    transition: border-color 0.15s;
-    appearance: none;
-    -webkit-appearance: none;
-  }
-  select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238892b0' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 32px; }
-  select:focus, input[type="number"]:focus { border-color: var(--accent); }
-  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
-
-  /* ── Now Playing ── */
-  .np-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    padding: 1.25rem;
-    margin-bottom: 1rem;
-    position: relative;
-    overflow: hidden;
-  }
-  .np-card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0; height: 2px;
-    background: var(--accent);
-    opacity: 0;
-    transition: opacity 0.3s;
-  }
-  .np-card.playing::before { opacity: 1; }
-
-  .np-status {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 0.875rem;
-  }
-  .status-dot {
-    width: 8px; height: 8px;
-    border-radius: 50%;
-    background: var(--text3);
-    flex-shrink: 0;
-  }
-  .status-dot.playing {
-    background: var(--green);
-    box-shadow: 0 0 8px var(--green);
-    animation: blink 1.4s ease-in-out infinite;
-  }
-  .status-dot.paused { background: var(--amber); }
-  .status-dot.done { background: var(--green); }
-  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.4} }
-
-  .np-status-text { font-size: 0.72rem; color: var(--text2); text-transform: uppercase; letter-spacing: 0.8px; }
-
-  .np-main {
-    font-size: 1.35rem;
-    font-weight: 600;
-    color: var(--text);
-    min-height: 1.8rem;
-    margin-bottom: 6px;
-  }
-  .np-detail { font-size: 0.8rem; color: var(--text2); min-height: 1.2rem; }
-
-  .np-badges {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    margin-top: 10px;
-  }
-  .badge {
-    font-size: 0.72rem;
-    padding: 3px 10px;
-    border-radius: 20px;
-    font-weight: 500;
-  }
-  .badge-rep { background: var(--green-dim); color: var(--green); border: 1px solid #1a5540; }
-  .badge-pos { background: var(--accent-dim); color: var(--accent); border: 1px solid #2a3a7a; }
-
-  /* Progress */
-  .progress-row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-top: 1rem;
-  }
-  .progress-track {
-    flex: 1;
-    height: 3px;
-    background: var(--surface3);
-    border-radius: 2px;
-    overflow: hidden;
-  }
-  .progress-fill {
-    height: 100%;
-    background: var(--accent);
-    border-radius: 2px;
-    transition: width 0.4s ease;
-    width: 0%;
-  }
-  .progress-label { font-size: 0.7rem; color: var(--text3); white-space: nowrap; }
-
-  /* ── Controls ── */
-  .controls-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    padding: 1.25rem;
-    margin-bottom: 1rem;
-  }
-  .controls-main {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-  }
-  .ctrl-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    border: 1px solid var(--border2);
-    background: var(--surface2);
-    color: var(--text2);
-    cursor: pointer;
-    transition: all 0.15s;
-    outline: none;
-    flex-shrink: 0;
-  }
-  .ctrl-btn:hover { background: var(--surface3); color: var(--text); border-color: var(--accent); }
-  .ctrl-btn:active { transform: scale(0.93); }
-  .ctrl-btn:disabled { opacity: 0.3; cursor: not-allowed; transform: none; }
-  .ctrl-btn.sm { width: 40px; height: 40px; }
-  .ctrl-btn.md { width: 48px; height: 48px; }
-  .ctrl-btn.lg {
-    width: 60px; height: 60px;
-    background: var(--accent);
-    border-color: var(--accent);
-    color: #fff;
-  }
-  .ctrl-btn.lg:hover { background: #4a6ae8; border-color: #4a6ae8; color: #fff; }
-  .ctrl-btn svg { pointer-events: none; }
-
-  .controls-secondary {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: 1rem;
-    padding-top: 0.875rem;
-    border-top: 1px solid var(--border);
-  }
-  .ctrl-text-btn {
-    background: none;
-    border: none;
-    color: var(--text3);
-    font-size: 0.78rem;
-    cursor: pointer;
-    padding: 4px 8px;
-    border-radius: 6px;
-    transition: color 0.15s, background 0.15s;
-  }
-  .ctrl-text-btn:hover { color: var(--text2); background: var(--surface2); }
-  .ctrl-text-btn.danger:hover { color: var(--red); background: var(--red-dim); }
-
-  /* ── Queue Log ── */
-  .log-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    overflow: hidden;
-    margin-bottom: 1rem;
-  }
-  .log-header {
-    padding: 0.875rem 1.25rem;
-    border-bottom: 1px solid var(--border);
-    font-size: 0.7rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    color: var(--text3);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-  .log-count { color: var(--text3); font-size: 0.7rem; }
-  .log-body {
-    max-height: 200px;
-    overflow-y: auto;
-    padding: 0.5rem 0;
-  }
-  .log-body::-webkit-scrollbar { width: 4px; }
-  .log-body::-webkit-scrollbar-track { background: transparent; }
-  .log-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
-  .log-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 6px 1.25rem;
-    font-size: 0.8rem;
-    color: var(--text3);
-    transition: background 0.15s;
-  }
-  .log-item .li-index { width: 20px; text-align: right; font-size: 0.68rem; color: var(--text3); flex-shrink: 0; }
-  .log-item .li-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--text3); flex-shrink: 0; }
-  .log-item .li-text { flex: 1; }
-  .log-item .li-badge { font-size: 0.65rem; }
-  .log-item.active { background: var(--accent-dim); color: var(--text); }
-  .log-item.active .li-dot { background: var(--accent); box-shadow: 0 0 6px var(--accent); }
-  .log-item.active .li-text { color: var(--accent); }
-  .log-item.done .li-dot { background: var(--green); }
-  .log-item.done .li-text { color: var(--text3); }
-  .log-empty { padding: 1.5rem; text-align: center; color: var(--text3); font-size: 0.82rem; }
-
-  /* ── Responsive ── */
-  @media (max-width: 480px) {
-    .page { padding: 1rem 0.75rem 2.5rem; }
-    .app-header h1 { font-size: 1.25rem; }
-    .grid-3 { grid-template-columns: 1fr 1fr; }
-    .np-main { font-size: 1.15rem; }
-    .ctrl-btn.lg { width: 54px; height: 54px; }
-    .ctrl-btn.md { width: 44px; height: 44px; }
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .status-dot.playing { animation: none; }
-    .progress-fill { transition: none; }
-  }
+  body { background: #0a0a0a; font-family: 'Inter', sans-serif; overflow-x: hidden; }
+  .material-symbols-outlined { font-variation-settings: 'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24; vertical-align: middle; user-select: none; }
+  .glass { background: rgba(255,255,255,0.05); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.08); }
+  .glass-strong { background: rgba(255,255,255,0.07); backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px); border: 1px solid rgba(255,255,255,0.12); }
+  #drawer { transform: translateX(-100%); transition: transform 0.35s cubic-bezier(0.4,0,0.2,1); }
+  #drawer.open { transform: translateX(0); }
+  #overlay { opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
+  #overlay.open { opacity: 1; pointer-events: auto; }
+  .active-glow { border-color: rgba(78,222,163,0.5) !important; box-shadow: 0 0 20px rgba(78,222,163,0.15); }
+  @keyframes pulse-glow { 0%,100%{box-shadow:0 0 20px rgba(78,222,163,0.15)} 50%{box-shadow:0 0 40px rgba(78,222,163,0.35)} }
+  .playing-pulse { animation: pulse-glow 2.5s ease-in-out infinite; }
+  @keyframes eq1 { 0%,100%{height:6px} 50%{height:18px} }
+  @keyframes eq2 { 0%,100%{height:14px} 50%{height:6px} }
+  @keyframes eq3 { 0%,100%{height:10px} 50%{height:20px} }
+  .eq-bar:nth-child(1) { animation: eq1 0.8s ease-in-out infinite; }
+  .eq-bar:nth-child(2) { animation: eq2 0.6s ease-in-out infinite 0.1s; }
+  .eq-bar:nth-child(3) { animation: eq3 0.9s ease-in-out infinite 0.2s; }
+  .log-item { transition: all 0.25s ease; }
+  .log-item.active { background: rgba(78,222,163,0.08); border-color: rgba(78,222,163,0.3); }
+  .log-item.done { opacity: 0.45; }
+  input[type=range] { -webkit-appearance: none; appearance: none; background: rgba(255,255,255,0.1); border-radius: 9999px; height: 4px; }
+  input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: #4edea3; cursor: pointer; border: 2px solid #0a0a0a; }
+  input[type=number]::-webkit-inner-spin-button { opacity: 0.5; }
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
+  select option { background: #1a1a1a; color: #e5e2e1; }
+  .ctrl-btn { display:flex; align-items:center; justify-content:center; border-radius:9999px; transition: all 0.15s; cursor:pointer; border:none; outline:none; }
+  .ctrl-btn:active:not(:disabled) { transform: scale(0.9); }
+  .ctrl-btn:disabled { opacity: 0.25; cursor: not-allowed; }
+  .progress-fill { transition: width 0.35s ease; }
+  @media (max-width: 640px) { .pb-safe { padding-bottom: max(1rem, env(safe-area-inset-bottom)); } }
 </style>
 </head>
-<body>
-<div class="page">
+<body class="dark text-on-surface selection:bg-primary/20">
 
-  <!-- Header -->
-  <header class="app-header">
-    <div class="icon-wrap">🕌</div>
-    <h1>Ezber Programı</h1>
-    <p>Tekrar Yöntemiyle Ayet Ezberleme Aracı</p>
-  </header>
+<!-- ── Overlay ── -->
+<div class="fixed inset-0 bg-black/60 z-50 backdrop-blur-sm" id="overlay"></div>
 
-  <!-- Settings -->
-  <div class="card">
-    <div class="card-label">Ayarlar</div>
-    <div class="field" style="margin-bottom:12px">
-      <label for="suraSelect">Sure</label>
-      <select id="suraSelect"></select>
+<!-- ── Drawer ── -->
+<aside id="drawer" class="fixed inset-y-0 left-0 z-[60] w-[320px] glass-strong flex flex-col rounded-r-3xl shadow-2xl overflow-y-auto">
+  <div class="flex items-center justify-between p-6 pb-4 border-b border-white/[0.08]">
+    <h2 class="text-primary font-bold text-lg">Ezber Ayarları</h2>
+    <button id="closeDrawer" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/10 text-on-surface-dim hover:text-white transition-colors">
+      <span class="material-symbols-outlined text-[20px]">close</span>
+    </button>
+  </div>
+  <div class="flex flex-col gap-5 p-6">
+    <!-- Sure -->
+    <div class="flex flex-col gap-2">
+      <label class="text-[11px] font-semibold uppercase tracking-widest text-on-surface-dim">Sure</label>
+      <select id="suraSelect" class="w-full glass rounded-xl px-4 py-3 text-on-surface text-sm focus:outline-none focus:ring-1 focus:ring-primary/50 bg-transparent"></select>
     </div>
-    <div class="grid-3" style="margin-bottom:12px">
-      <div class="field">
-        <label for="startAyah">Başlangıç Ayeti</label>
-        <input type="number" id="startAyah" min="1" value="1">
+    <!-- Ayet -->
+    <div class="grid grid-cols-2 gap-3">
+      <div class="flex flex-col gap-2">
+        <label class="text-[11px] font-semibold uppercase tracking-widest text-on-surface-dim">Başlangıç</label>
+        <input id="startAyah" type="number" min="1" value="1" class="glass rounded-xl px-4 py-3 text-on-surface text-sm focus:outline-none focus:ring-1 focus:ring-primary/50 bg-transparent w-full">
       </div>
-      <div class="field">
-        <label for="endAyah">Bitiş Ayeti</label>
-        <input type="number" id="endAyah" min="1" value="3">
-      </div>
-      <div class="field">
-        <label for="reps">Tekrar (2–10)</label>
-        <input type="number" id="reps" min="2" max="10" value="3">
+      <div class="flex flex-col gap-2">
+        <label class="text-[11px] font-semibold uppercase tracking-widest text-on-surface-dim">Bitiş</label>
+        <input id="endAyah" type="number" min="1" value="3" class="glass rounded-xl px-4 py-3 text-on-surface text-sm focus:outline-none focus:ring-1 focus:ring-primary/50 bg-transparent w-full">
       </div>
     </div>
+    <!-- Tekrar -->
+    <div class="flex flex-col gap-3">
+      <div class="flex justify-between items-center">
+        <label class="text-[11px] font-semibold uppercase tracking-widest text-on-surface-dim">Tekrar Sayısı</label>
+        <span id="repsValue" class="text-primary font-bold text-lg">3</span>
+      </div>
+      <input id="reps" type="range" min="2" max="10" value="3" class="w-full accent-primary">
+    </div>
+    <!-- Kari -->
+    <div class="glass rounded-xl px-4 py-3 flex items-center gap-3">
+      <span class="material-symbols-outlined text-primary text-xl">record_voice_over</span>
+      <div>
+        <p class="text-[10px] text-on-surface-dim uppercase tracking-widest">Kari</p>
+        <p class="text-sm font-medium text-on-surface">İshak Demirci</p>
+      </div>
+    </div>
+    <!-- Uygula -->
+    <button id="btnApply" class="w-full py-3.5 bg-primary text-on-primary font-bold rounded-2xl active:scale-95 transition-all text-sm tracking-wide">
+      Uygula ve Başlat
+    </button>
+    <!-- Sıfırla -->
+    <button id="btnReset" class="w-full py-3 rounded-2xl border border-white/10 text-on-surface-dim hover:text-red-400 hover:border-red-400/30 transition-colors text-sm font-medium">
+      Sıfırla
+    </button>
   </div>
-
-  <!-- Now Playing -->
-  <div class="np-card" id="npCard">
-    <div class="np-status">
-      <div class="status-dot" id="statusDot"></div>
-      <span class="np-status-text" id="statusText">Bekleniyor</span>
-    </div>
-    <div class="np-main" id="npMain">— · —</div>
-    <div class="np-detail" id="npDetail">Sure ve ayet aralığını seçip oynat'a basın.</div>
-    <div class="np-badges" id="npBadges" style="display:none">
-      <span class="badge badge-rep" id="badgeRep"></span>
-      <span class="badge badge-pos" id="badgePos"></span>
-    </div>
-    <div class="progress-row">
-      <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
-      <span class="progress-label" id="progressLabel">0 / 0</span>
-    </div>
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">
-      <span style="font-size:0.7rem;color:var(--text3)">Tahmini Toplam Sure</span>
-      <span style="font-size:0.82rem;font-weight:600;color:var(--text2);font-family:monospace;letter-spacing:1px" id="totalDuration">—</span>
-    </div>
-  </div>
-
-  <!-- Controls -->
-  <div class="controls-card">
-    <div class="controls-main">
-      <!-- Başa dön -->
-      <button class="ctrl-btn sm" id="btnFirst" title="Başa dön" disabled>
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <polygon points="19 20 9 12 19 4 19 20"></polygon>
-          <line x1="5" y1="19" x2="5" y2="5"></line>
-        </svg>
-      </button>
-      <!-- Geri al -->
-      <button class="ctrl-btn md" id="btnPrev" title="Önceki" disabled>
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <polygon points="19 20 9 12 19 4 19 20"></polygon>
-          <polygon points="5 20 5 4 5 4"></polygon>
-          <line x1="5" y1="19" x2="5" y2="5" style="display:none"></line>
-        </svg>
-      </button>
-      <!-- Oynat / Duraklat -->
-      <button class="ctrl-btn lg" id="btnPlay" title="Oynat">
-        <svg id="iconPlay" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-          <polygon points="5 3 19 12 5 21 5 3"></polygon>
-        </svg>
-        <svg id="iconPause" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" style="display:none">
-          <rect x="6" y="4" width="4" height="16"></rect>
-          <rect x="14" y="4" width="4" height="16"></rect>
-        </svg>
-      </button>
-      <!-- İleri al -->
-      <button class="ctrl-btn md" id="btnNext" title="Sonraki" disabled>
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <polygon points="5 4 15 12 5 20 5 4"></polygon>
-          <line x1="19" y1="5" x2="19" y2="19"></line>
-        </svg>
-      </button>
-      <!-- Sona git -->
-      <button class="ctrl-btn sm" id="btnLast" title="Sona git" disabled>
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <polygon points="5 4 15 12 5 20 5 4"></polygon>
-          <line x1="19" y1="5" x2="19" y2="19"></line>
-          <line x1="19" y1="4" x2="19" y2="20"></line>
-        </svg>
-      </button>
-    </div>
-    <div class="controls-secondary">
-      <button class="ctrl-text-btn" id="btnRebuild">↺ Kuyruğu Yenile</button>
-      <button class="ctrl-text-btn danger" id="btnReset">✕ Sıfırla</button>
+  <!-- Son konum -->
+  <div class="mt-auto p-6 pt-0">
+    <div class="glass rounded-xl p-4 flex items-center gap-3">
+      <span class="material-symbols-outlined text-primary/60 text-xl">history</span>
+      <div>
+        <p class="text-[10px] text-on-surface-dim uppercase tracking-widest">Son Konum</p>
+        <p class="text-sm font-medium text-on-surface" id="lastPosLabel">—</p>
+      </div>
+      <button id="btnResume" class="ml-auto text-[11px] font-semibold text-primary bg-primary/10 px-3 py-1.5 rounded-full hover:bg-primary/20 transition-colors hidden">Devam</button>
     </div>
   </div>
+</aside>
 
-  <!-- Queue -->
-  <div class="log-card">
-    <div class="log-header">
-      <span>Çalma Kuyruğu</span>
-      <span class="log-count" id="logCount">—</span>
-    </div>
-    <div class="log-body" id="logBody">
-      <div class="log-empty">Kuyruk henüz oluşturulmadı.</div>
+<!-- ── Header ── -->
+<header class="fixed top-0 w-full z-40 glass border-b border-white/[0.07] flex items-center justify-between px-4 sm:px-6 h-14">
+  <div class="flex items-center gap-3">
+    <button id="openDrawer" class="w-9 h-9 flex items-center justify-center rounded-full hover:bg-white/10 transition-colors active:scale-95">
+      <span class="material-symbols-outlined text-primary text-[22px]">menu</span>
+    </button>
+    <h1 class="text-primary font-extrabold text-xl tracking-tight">Ezber Programı</h1>
+  </div>
+  <div class="flex items-center gap-2">
+    <div class="hidden sm:flex items-center gap-1.5 glass rounded-full px-3 py-1.5">
+      <span class="material-symbols-outlined text-primary/60 text-[16px]">schedule</span>
+      <span class="text-[11px] font-semibold text-on-surface-dim" id="totalDurHeader">—</span>
     </div>
   </div>
+</header>
 
-</div>
+<!-- ── Main ── -->
+<main class="pt-14 pb-24 sm:pb-8 min-h-screen">
+  <div class="max-w-2xl mx-auto px-4 sm:px-6 py-6 flex flex-col gap-5">
+
+    <!-- Hero Player Card -->
+    <div class="glass-strong rounded-3xl p-6 flex flex-col items-center gap-5 relative overflow-hidden" id="npCard">
+      <!-- ambient glow -->
+      <div class="absolute -top-16 -right-16 w-48 h-48 bg-primary/10 blur-[80px] rounded-full pointer-events-none"></div>
+      <div class="absolute -bottom-16 -left-16 w-48 h-48 bg-primary/5 blur-[80px] rounded-full pointer-events-none"></div>
+
+      <!-- Art + Status -->
+      <div class="relative" id="artWrap">
+        <div class="w-36 h-36 sm:w-44 sm:h-44 rounded-3xl glass flex items-center justify-center overflow-hidden border-2 border-white/10 transition-all duration-700" id="artContainer">
+          <span class="material-symbols-outlined text-primary/30" style="font-size:72px">menu_book</span>
+        </div>
+        <!-- EQ bars overlay -->
+        <div id="eqOverlay" class="absolute inset-0 flex items-end justify-center gap-1 pb-4 pointer-events-none opacity-0 transition-opacity duration-300">
+          <div class="eq-bar w-1.5 bg-primary rounded-full" style="height:6px"></div>
+          <div class="eq-bar w-1.5 bg-primary rounded-full" style="height:14px"></div>
+          <div class="eq-bar w-1.5 bg-primary rounded-full" style="height:10px"></div>
+        </div>
+        <!-- Status dot -->
+        <div id="statusBadge" class="absolute -top-2 -right-2 flex items-center gap-1.5 glass rounded-full px-2.5 py-1">
+          <div id="statusDot" class="w-2 h-2 rounded-full bg-white/20"></div>
+          <span id="statusText" class="text-[10px] font-semibold text-on-surface-dim uppercase tracking-wider">Bekliyor</span>
+        </div>
+      </div>
+
+      <!-- Info -->
+      <div class="text-center space-y-1">
+        <h2 class="font-bold text-xl sm:text-2xl text-white" id="npMain">— · —</h2>
+        <p class="text-primary/80 text-sm font-medium" id="npDetail">Ayarları açıp sure ve ayet seçin</p>
+        <div id="npBadges" class="flex items-center justify-center gap-2 pt-1" style="display:none!important">
+          <span id="badgeRep" class="text-[11px] font-semibold px-3 py-1 rounded-full bg-primary/10 text-primary border border-primary/20"></span>
+          <span id="badgePos" class="text-[11px] font-semibold px-3 py-1 rounded-full bg-white/5 text-on-surface-dim border border-white/10"></span>
+        </div>
+      </div>
+
+      <!-- Progress -->
+      <div class="w-full space-y-2">
+        <div class="h-1 w-full bg-white/10 rounded-full overflow-hidden">
+          <div id="progressFill" class="progress-fill h-full bg-primary rounded-full" style="width:0%"></div>
+        </div>
+        <div class="flex justify-between items-center">
+          <span class="text-[10px] text-on-surface-dim font-mono" id="progressLabel">0 / 0</span>
+          <span class="text-[10px] text-on-surface-dim font-mono flex items-center gap-1">
+            <span class="material-symbols-outlined" style="font-size:12px">schedule</span>
+            <span id="totalDuration">—</span>
+          </span>
+        </div>
+      </div>
+
+      <!-- Controls -->
+      <div class="flex items-center gap-3 sm:gap-4">
+        <!-- Başa dön -->
+        <button id="btnFirst" class="ctrl-btn w-9 h-9 bg-white/5 text-on-surface-dim hover:bg-white/10 hover:text-white" disabled title="Başa dön">
+          <span class="material-symbols-outlined text-[18px]">first_page</span>
+        </button>
+        <!-- Önceki -->
+        <button id="btnPrev" class="ctrl-btn w-11 h-11 bg-white/5 text-on-surface-dim hover:bg-white/10 hover:text-white" disabled title="Önceki">
+          <span class="material-symbols-outlined text-[22px]">skip_previous</span>
+        </button>
+        <!-- Oynat/Duraklat -->
+        <button id="btnPlay" class="ctrl-btn w-16 h-16 bg-primary text-on-primary shadow-xl shadow-primary/30 hover:bg-primary/90" title="Oynat">
+          <span class="material-symbols-outlined text-[36px]" id="playIcon">play_arrow</span>
+        </button>
+        <!-- Sonraki -->
+        <button id="btnNext" class="ctrl-btn w-11 h-11 bg-white/5 text-on-surface-dim hover:bg-white/10 hover:text-white" disabled title="Sonraki">
+          <span class="material-symbols-outlined text-[22px]">skip_next</span>
+        </button>
+        <!-- Sona git -->
+        <button id="btnLast" class="ctrl-btn w-9 h-9 bg-white/5 text-on-surface-dim hover:bg-white/10 hover:text-white" disabled title="Sona git">
+          <span class="material-symbols-outlined text-[18px]">last_page</span>
+        </button>
+      </div>
+
+      <!-- Secondary controls -->
+      <div class="flex items-center justify-between w-full pt-1 border-t border-white/[0.06]">
+        <button id="btnRebuild" class="text-[11px] text-on-surface-dim hover:text-primary transition-colors flex items-center gap-1 py-1 px-2 rounded-lg hover:bg-white/5">
+          <span class="material-symbols-outlined text-[14px]">refresh</span>Kuyruğu Yenile
+        </button>
+        <button id="btnResetCtrl" class="text-[11px] text-on-surface-dim hover:text-red-400 transition-colors flex items-center gap-1 py-1 px-2 rounded-lg hover:bg-red-500/5">
+          <span class="material-symbols-outlined text-[14px]">stop_circle</span>Sıfırla
+        </button>
+      </div>
+    </div>
+
+    <!-- Queue Card -->
+    <div class="glass rounded-2xl overflow-hidden">
+      <div class="flex items-center justify-between px-5 py-3.5 border-b border-white/[0.06]">
+        <div class="flex items-center gap-2">
+          <span class="material-symbols-outlined text-primary/60 text-[18px]">queue_music</span>
+          <h3 class="text-sm font-semibold text-on-surface">Çalma Kuyruğu</h3>
+        </div>
+        <span id="logCount" class="text-[11px] text-on-surface-dim font-medium glass rounded-full px-2.5 py-0.5">—</span>
+      </div>
+      <div id="logBody" class="max-h-[280px] overflow-y-auto divide-y divide-white/[0.04]">
+        <div class="px-5 py-8 text-center text-sm text-on-surface-dim">
+          <span class="material-symbols-outlined text-white/10 block mb-2" style="font-size:36px">queue_music</span>
+          Kuyruk henüz oluşturulmadı.
+        </div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<!-- ── Bottom Nav (mobile) ── -->
+<nav class="sm:hidden fixed bottom-0 left-0 w-full z-40 glass border-t border-white/[0.07] flex justify-around items-center px-2 py-2 pb-safe rounded-t-2xl">
+  <div class="flex flex-col items-center gap-0.5 px-4 py-1.5 rounded-xl bg-primary/10">
+    <span class="material-symbols-outlined text-primary text-[22px]">auto_stories</span>
+    <span class="text-[10px] text-primary font-semibold">Ezber</span>
+  </div>
+  <button onclick="document.getElementById('openDrawer').click()" class="flex flex-col items-center gap-0.5 px-4 py-1.5 rounded-xl hover:bg-white/5 transition-colors">
+    <span class="material-symbols-outlined text-on-surface-dim text-[22px]">tune</span>
+    <span class="text-[10px] text-on-surface-dim">Ayarlar</span>
+  </button>
+  <div class="flex flex-col items-center gap-0.5 px-4 py-1.5 rounded-xl">
+    <span class="material-symbols-outlined text-on-surface-dim text-[22px]">schedule</span>
+    <span class="text-[10px] text-on-surface-dim font-mono" id="totalDurNav">—</span>
+  </div>
+</nav>
 
 <script>
+// ── Surah Data ──
 const SURAH_DATA = [
   [1,"Fatiha",7],[2,"Bakara",286],[3,"Ali İmran",200],[4,"Nisa",176],
   [5,"Maide",120],[6,"Enam",165],[7,"Araf",206],[8,"Enfal",75],
@@ -479,7 +307,7 @@ const SURAH_DATA = [
 
 const BASE = 'https://webdosya.diyanet.gov.tr/kuran/kuranikerim/Sound/ar_ishakdemir/';
 
-// populate select
+// ── Populate select ──
 const sel = document.getElementById('suraSelect');
 SURAH_DATA.forEach(([num, name, verses]) => {
   const o = document.createElement('option');
@@ -488,19 +316,80 @@ SURAH_DATA.forEach(([num, name, verses]) => {
   sel.appendChild(o);
 });
 
-// state
-let queue = [];
-let qPos = 0;
-let isPlaying = false;
-let isPaused = false;
-let stopFlag = false;
-let audio = null;
-let resolvePlay = null;
+// ── Drawer ──
+const drawer = document.getElementById('drawer');
+const overlay = document.getElementById('overlay');
+document.getElementById('openDrawer').onclick = toggleDrawer;
+document.getElementById('closeDrawer').onclick = toggleDrawer;
+overlay.onclick = toggleDrawer;
+function toggleDrawer() { drawer.classList.toggle('open'); overlay.classList.toggle('open'); }
 
-// elements
+// ── Range label ──
+const repsEl = document.getElementById('reps');
+const repsVal = document.getElementById('repsValue');
+repsEl.oninput = () => { repsVal.textContent = repsEl.value; };
+
+// ── LocalStorage persistence ──
+const LS = {
+  save(key, val) { try { localStorage.setItem('ezber_' + key, JSON.stringify(val)); } catch(e){} },
+  load(key, def) { try { const v = localStorage.getItem('ezber_' + key); return v !== null ? JSON.parse(v) : def; } catch(e){ return def; } }
+};
+
+function saveSettings() {
+  LS.save('sura', sel.value);
+  LS.save('start', document.getElementById('startAyah').value);
+  LS.save('end', document.getElementById('endAyah').value);
+  LS.save('reps', repsEl.value);
+}
+
+function savePosition(pos) {
+  if (!queue.length || pos < 0) return;
+  const item = queue[pos];
+  LS.save('lastPos', { sura: item.sura, suraName: item.suraName, ayah: item.ayah, rep: item.rep, qPos: pos });
+}
+
+function loadSettings() {
+  sel.value = LS.load('sura', '1');
+  document.getElementById('startAyah').value = LS.load('start', '1');
+  document.getElementById('endAyah').value = LS.load('end', '3');
+  repsEl.value = LS.load('reps', '3');
+  repsVal.textContent = repsEl.value;
+  refreshSuraMax();
+  loadLastPos();
+}
+
+function loadLastPos() {
+  const lp = LS.load('lastPos', null);
+  const label = document.getElementById('lastPosLabel');
+  const btn = document.getElementById('btnResume');
+  if (lp) {
+    label.textContent = `${lp.suraName} · ${lp.ayah}. Ayet (${lp.rep}. tekrar)`;
+    btn.classList.remove('hidden');
+  } else {
+    label.textContent = '—';
+    btn.classList.add('hidden');
+  }
+}
+
+document.getElementById('btnResume').onclick = () => {
+  const lp = LS.load('lastPos', null);
+  if (!lp) return;
+  // Restore settings to match saved sura
+  sel.value = lp.sura;
+  refreshSuraMax();
+  toggleDrawer();
+  const q = buildQueue();
+  renderLog();
+  const resumePos = Math.min(lp.qPos, q.length - 1);
+  qPos = resumePos;
+  runFrom(resumePos);
+};
+
+// ── State ──
+let queue = [], qPos = 0, isPlaying = false, isPaused = false, stopFlag = false, audio = null, resolvePlay = null;
+
+// ── Elements ──
 const npCard = document.getElementById('npCard');
-const statusDot = document.getElementById('statusDot');
-const statusText = document.getElementById('statusText');
 const npMain = document.getElementById('npMain');
 const npDetail = document.getElementById('npDetail');
 const npBadges = document.getElementById('npBadges');
@@ -510,34 +399,39 @@ const progressFill = document.getElementById('progressFill');
 const progressLabel = document.getElementById('progressLabel');
 const logBody = document.getElementById('logBody');
 const logCount = document.getElementById('logCount');
-
+const eqOverlay = document.getElementById('eqOverlay');
+const artContainer = document.getElementById('artContainer');
 const btnPlay = document.getElementById('btnPlay');
-const iconPlay = document.getElementById('iconPlay');
-const iconPause = document.getElementById('iconPause');
+const playIcon = document.getElementById('playIcon');
 const btnPrev = document.getElementById('btnPrev');
 const btnNext = document.getElementById('btnNext');
 const btnFirst = document.getElementById('btnFirst');
 const btnLast = document.getElementById('btnLast');
-const btnReset = document.getElementById('btnReset');
-const btnRebuild = document.getElementById('btnRebuild');
 
-function getSuraName(num) {
-  const s = SURAH_DATA.find(x => x[0] === num);
-  return s ? s[1] : `${num}. Sure`;
+function getSuraName(num) { const s = SURAH_DATA.find(x => x[0] === num); return s ? s[1] : `${num}. Sure`; }
+
+function refreshSuraMax() {
+  const sura = parseInt(sel.value);
+  const s = SURAH_DATA.find(x => x[0] === sura);
+  if (s) {
+    document.getElementById('endAyah').max = s[2];
+    document.getElementById('startAyah').max = s[2];
+  }
 }
+
+sel.onchange = refreshSuraMax;
 
 function buildQueue() {
   const sura = parseInt(sel.value);
   let start = parseInt(document.getElementById('startAyah').value) || 1;
   let end = parseInt(document.getElementById('endAyah').value) || 1;
-  const reps = Math.min(10, Math.max(2, parseInt(document.getElementById('reps').value) || 3));
+  const reps = Math.min(10, Math.max(2, parseInt(repsEl.value) || 3));
   const suraInfo = SURAH_DATA.find(x => x[0] === sura);
   const maxV = suraInfo ? suraInfo[2] : 999;
   start = Math.max(1, Math.min(start, maxV));
   end = Math.max(start, Math.min(end, maxV));
   document.getElementById('startAyah').value = start;
   document.getElementById('endAyah').value = end;
-
   queue = [];
   for (let pivot = start; pivot <= end; pivot++) {
     for (let r = 0; r < reps; r++) {
@@ -553,31 +447,24 @@ function fmtDuration(secs) {
   const h = Math.floor(secs / 3600);
   const m = Math.floor((secs % 3600) / 60);
   const s = Math.floor(secs % 60);
-  return [h, m, s].map(v => String(v).padStart(2, '0')).join(':');
+  return [h, m, s].map(v => String(v).padStart(2,'0')).join(':');
 }
 
-function updateTotalDuration() {
-  const el = document.getElementById('totalDuration');
-  if (!queue.length) { el.textContent = '—'; return; }
-  // Average ayet ~8s, gap 1.5s between each item
-  const avgAyet = 8;
-  const gap = 1.5;
-  const totalSecs = queue.length * avgAyet + Math.max(0, queue.length - 1) * gap;
-  el.textContent = fmtDuration(totalSecs);
+function updateTotalDuration(perAyet) {
+  const avg = perAyet || 8;
+  const total = queue.length * avg + Math.max(0, queue.length - 1) * 1.5;
+  const str = fmtDuration(total);
+  document.getElementById('totalDuration').textContent = str;
+  document.getElementById('totalDurHeader').textContent = str;
+  document.getElementById('totalDurNav').textContent = str;
 }
 
-// Group queue items for log display
 function getGroups() {
-  const groups = [];
-  let cur = null;
+  const groups = []; let cur = null;
   queue.forEach((item, i) => {
     const key = `${item.pivot}-${item.rep}`;
-    if (!cur || cur.key !== key) {
-      cur = { key, pivot: item.pivot, rep: item.rep, totalReps: item.totalReps, startIdx: i, endIdx: i, sura: item.sura, suraName: item.suraName };
-      groups.push(cur);
-    } else {
-      cur.endIdx = i;
-    }
+    if (!cur || cur.key !== key) { cur = { key, pivot: item.pivot, rep: item.rep, totalReps: item.totalReps, startIdx: i, endIdx: i, sura: item.sura, suraName: item.suraName }; groups.push(cur); }
+    else { cur.endIdx = i; }
   });
   return groups;
 }
@@ -585,76 +472,83 @@ function getGroups() {
 function renderLog() {
   updateTotalDuration();
   if (!queue.length) {
-    logBody.innerHTML = '<div class="log-empty">Kuyruk henüz oluşturulmadı.</div>';
-    logCount.textContent = '—';
-    return;
+    logBody.innerHTML = '<div class="px-5 py-8 text-center text-sm text-on-surface-dim"><span class="material-symbols-outlined text-white/10 block mb-2" style="font-size:36px">queue_music</span>Kuyruk henüz oluşturulmadı.</div>';
+    logCount.textContent = '—'; return;
   }
   const groups = getGroups();
   logCount.textContent = `${groups.length} grup · ${queue.length} ses`;
   logBody.innerHTML = groups.map((g, gi) => {
-    const startAyah = queue[g.startIdx].ayah;
-    const endAyah = queue[g.endIdx].ayah;
-    const rangeStr = startAyah === endAyah ? `Ayet ${startAyah}` : `Ayet ${startAyah}–${endAyah}`;
-    return `<div class="log-item" id="grp${gi}">
-      <span class="li-index">${gi + 1}</span>
-      <span class="li-dot"></span>
-      <span class="li-text">${g.suraName} · ${rangeStr}</span>
-      <span class="badge badge-rep li-badge" style="font-size:0.65rem">${g.rep}/${g.totalReps}</span>
+    const s = queue[g.startIdx].ayah;
+    const e = queue[g.endIdx].ayah;
+    const range = s === e ? `${s}. Ayet` : `${s}–${e}. Ayet`;
+    return `<div class="log-item flex items-center gap-3 px-5 py-3 border border-transparent" id="grp${gi}">
+      <span class="w-5 text-right text-[11px] text-on-surface-dim font-mono flex-shrink-0">${gi+1}</span>
+      <div class="w-1.5 h-1.5 rounded-full bg-white/15 flex-shrink-0" id="dot${gi}"></div>
+      <span class="flex-1 text-sm text-on-surface/70">${g.suraName} · ${range}</span>
+      <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-white/5 text-on-surface-dim">${g.rep}/${g.totalReps}</span>
     </div>`;
   }).join('');
 }
 
 function getGroupForPos(pos) {
   const groups = getGroups();
-  for (let i = 0; i < groups.length; i++) {
-    if (pos >= groups[i].startIdx && pos <= groups[i].endIdx) return i;
-  }
+  for (let i = 0; i < groups.length; i++) { if (pos >= groups[i].startIdx && pos <= groups[i].endIdx) return i; }
   return -1;
 }
 
 function updateLog(pos) {
-  const groups = getGroups();
   const gi = getGroupForPos(pos);
   document.querySelectorAll('.log-item').forEach((el, i) => {
-    el.classList.remove('active', 'done');
-    if (i < gi) el.classList.add('done');
+    el.classList.remove('active','done');
+    const dot = document.getElementById('dot' + i);
+    if (i < gi) { el.classList.add('done'); if(dot) dot.style.background='rgba(78,222,163,0.5)'; }
     else if (i === gi) {
       el.classList.add('active');
+      if(dot) { dot.style.background='#4edea3'; dot.style.boxShadow='0 0 6px #4edea3'; }
       el.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-    }
+    } else { if(dot) { dot.style.background=''; dot.style.boxShadow=''; } }
   });
 }
 
 function updateNP(item, pos) {
-  npCard.classList.add('playing');
-  statusDot.className = 'status-dot playing';
-  statusText.textContent = 'Çalıyor';
+  npCard.classList.add('playing-pulse');
+  artContainer.classList.add('active-glow');
+  eqOverlay.style.opacity = '1';
+  document.getElementById('statusDot').style.cssText = 'background:#4edea3; box-shadow: 0 0 8px #4edea3;';
+  document.getElementById('statusText').textContent = 'Çalıyor';
   npMain.textContent = `${item.suraName}  ·  ${item.ayah}. Ayet`;
   const groups = getGroups();
   const gi = getGroupForPos(pos);
   if (gi >= 0) {
     const g = groups[gi];
     const ayetler = queue.slice(g.startIdx, g.endIdx + 1).map(x => x.ayah);
-    npDetail.textContent = `Grup: ${item.sura}:${ayetler.join(', ')}`;
+    npDetail.textContent = `${item.rep}. tekrar — Grup: ${item.sura}:${ayetler.join(', ')}`;
   }
-  npBadges.style.display = 'flex';
+  npBadges.style.cssText = 'display:flex!important';
   badgeRep.textContent = `${item.rep}. tekrar / ${item.totalReps}`;
   badgePos.textContent = `${pos + 1} / ${queue.length}`;
   const pct = queue.length > 1 ? Math.round((pos / (queue.length - 1)) * 100) : 100;
   progressFill.style.width = pct + '%';
   progressLabel.textContent = `${pos + 1} / ${queue.length}`;
   setNavButtons();
+  savePosition(pos);
 }
 
-function setIdle(msg = 'Bekleniyor') {
-  npCard.classList.remove('playing');
-  statusDot.className = msg === 'Tamamlandı' ? 'status-dot done' : 'status-dot';
-  statusText.textContent = msg;
-  npMain.textContent = '— · —';
-  npDetail.textContent = 'Sure ve ayet aralığını seçip oynat\'a basın.';
-  npBadges.style.display = 'none';
-  progressFill.style.width = msg === 'Tamamlandı' ? '100%' : '0%';
-  progressLabel.textContent = '0 / 0';
+function setIdle(msg = 'Bekliyor') {
+  npCard.classList.remove('playing-pulse');
+  artContainer.classList.remove('active-glow');
+  eqOverlay.style.opacity = '0';
+  document.getElementById('statusDot').style.cssText = msg === 'Tamamlandı' ? 'background:#4edea3' : '';
+  document.getElementById('statusText').textContent = msg;
+  if (msg !== 'Tamamlandı') {
+    npMain.textContent = '— · —';
+    npDetail.textContent = 'Ayarları açıp sure ve ayet seçin';
+    npBadges.style.cssText = 'display:none!important';
+    progressFill.style.width = '0%';
+    progressLabel.textContent = '0 / 0';
+  } else {
+    progressFill.style.width = '100%';
+  }
 }
 
 function setNavButtons() {
@@ -665,8 +559,7 @@ function setNavButtons() {
 }
 
 function showPlayIcon(playing) {
-  if (playing) { iconPlay.style.display = 'none'; iconPause.style.display = ''; }
-  else { iconPlay.style.display = ''; iconPause.style.display = 'none'; }
+  playIcon.textContent = playing ? 'pause' : 'play_arrow';
 }
 
 function playFile(url) {
@@ -679,11 +572,8 @@ function playFile(url) {
     audio.onloadedmetadata = () => {
       if (audio.duration && !isNaN(audio.duration)) {
         const remaining = queue.length - qPos;
-        const gapSecs = Math.max(0, remaining - 1) * 1.5;
-        const estRemaining = remaining * audio.duration + gapSecs;
-        const elapsed = qPos * (audio.duration + 1.5);
-        const totalEst = elapsed + estRemaining;
-        document.getElementById('totalDuration').textContent = fmtDuration(totalEst);
+        const totalEst = qPos * (audio.duration + 1.5) + remaining * audio.duration + Math.max(0, remaining - 1) * 1.5;
+        updateTotalDuration(audio.duration);
       }
     };
     audio.play().catch(() => resolve('error'));
@@ -693,53 +583,35 @@ function playFile(url) {
 function delay(ms) {
   return new Promise(resolve => {
     const start = Date.now();
-    const check = setInterval(() => {
-      if (stopFlag) { clearInterval(check); resolve('stop'); }
-      else if (Date.now() - start >= ms) { clearInterval(check); resolve('ok'); }
+    const id = setInterval(() => {
+      if (stopFlag) { clearInterval(id); resolve('stop'); }
+      else if (Date.now() - start >= ms) { clearInterval(id); resolve('ok'); }
     }, 50);
   });
 }
 
 async function runFrom(startPos) {
-  isPlaying = true;
-  stopFlag = false;
+  isPlaying = true; stopFlag = false;
   showPlayIcon(true);
-  btnPlay.disabled = false;
-
   for (let i = startPos; i < queue.length; i++) {
     if (stopFlag) break;
     qPos = i;
-    const item = queue[i];
-    updateNP(item, i);
+    updateNP(queue[i], i);
     updateLog(i);
-
-    while (isPaused) {
-      await new Promise(r => setTimeout(r, 100));
-      if (stopFlag) break;
-    }
+    while (isPaused) { await new Promise(r => setTimeout(r, 80)); if (stopFlag) break; }
     if (stopFlag) break;
-
-    const url = `${BASE}${item.sura}_${item.ayah}.mp3`;
-    const res = await playFile(url);
+    const res = await playFile(`${BASE}${queue[i].sura}_${queue[i].ayah}.mp3`);
     if (stopFlag || res === 'stop') break;
-
-    if (i < queue.length - 1) {
-      const d = await delay(1500);
-      if (stopFlag || d === 'stop') break;
-    }
+    if (i < queue.length - 1) { const d = await delay(1500); if (stopFlag || d === 'stop') break; }
   }
-
   if (!stopFlag) {
-    isPlaying = false;
-    isPaused = false;
+    isPlaying = false; isPaused = false;
     showPlayIcon(false);
-    statusDot.className = 'status-dot done';
-    statusText.textContent = 'Tamamlandı';
-    npCard.classList.remove('playing');
-    progressFill.style.width = '100%';
+    setIdle('Tamamlandı');
     setNavButtons();
-    const logItems = document.querySelectorAll('.log-item');
-    logItems.forEach(el => { el.classList.remove('active'); el.classList.add('done'); });
+    document.querySelectorAll('.log-item').forEach(el => { el.classList.remove('active'); el.classList.add('done'); });
+    LS.save('lastPos', null);
+    loadLastPos();
   }
 }
 
@@ -750,104 +622,70 @@ function stopAudio() {
 }
 
 // ── Button handlers ──
-
 btnPlay.addEventListener('click', () => {
   if (isPaused) {
     isPaused = false;
     if (audio) audio.play();
     showPlayIcon(true);
-    statusDot.className = 'status-dot playing';
-    statusText.textContent = 'Çalıyor';
-    npCard.classList.add('playing');
+    document.getElementById('statusDot').style.cssText = 'background:#4edea3; box-shadow: 0 0 8px #4edea3;';
+    document.getElementById('statusText').textContent = 'Çalıyor';
+    npCard.classList.add('playing-pulse');
+    artContainer.classList.add('active-glow');
+    eqOverlay.style.opacity = '1';
     return;
   }
   if (isPlaying) {
     isPaused = true;
     if (audio) audio.pause();
     showPlayIcon(false);
-    statusDot.className = 'status-dot paused';
-    statusText.textContent = 'Duraklatıldı';
-    npCard.classList.remove('playing');
+    document.getElementById('statusDot').style.cssText = 'background:#fbbf24;';
+    document.getElementById('statusText').textContent = 'Durakladı';
+    npCard.classList.remove('playing-pulse');
+    artContainer.classList.remove('active-glow');
+    eqOverlay.style.opacity = '0';
     return;
   }
-  // Start fresh
   const q = buildQueue();
   if (!q.length) return;
-  renderLog();
-  qPos = 0;
+  renderLog(); qPos = 0;
   runFrom(0);
 });
 
-btnPrev.addEventListener('click', () => {
-  if (!queue.length) return;
-  const target = Math.max(0, qPos - 1);
-  stopAudio();
-  isPlaying = false; isPaused = false;
-  qPos = target;
-  runFrom(target);
+btnPrev.addEventListener('click', () => { if (!queue.length) return; stopAudio(); isPlaying = false; isPaused = false; const t = Math.max(0, qPos - 1); qPos = t; runFrom(t); });
+btnNext.addEventListener('click', () => { if (!queue.length) return; stopAudio(); isPlaying = false; isPaused = false; const t = Math.min(queue.length - 1, qPos + 1); qPos = t; runFrom(t); });
+btnFirst.addEventListener('click', () => { if (!queue.length) return; stopAudio(); isPlaying = false; isPaused = false; qPos = 0; runFrom(0); });
+btnLast.addEventListener('click', () => { if (!queue.length) return; stopAudio(); isPlaying = false; isPaused = false; const t = queue.length - 1; qPos = t; runFrom(t); });
+
+document.getElementById('btnRebuild').addEventListener('click', () => {
+  stopAudio(); isPlaying = false; isPaused = false; showPlayIcon(false);
+  buildQueue(); renderLog(); qPos = 0; setIdle('Kuyruk güncellendi'); setNavButtons();
 });
 
-btnNext.addEventListener('click', () => {
-  if (!queue.length) return;
-  const target = Math.min(queue.length - 1, qPos + 1);
-  stopAudio();
-  isPlaying = false; isPaused = false;
-  qPos = target;
-  runFrom(target);
-});
-
-btnFirst.addEventListener('click', () => {
-  if (!queue.length) return;
-  stopAudio();
-  isPlaying = false; isPaused = false;
-  qPos = 0;
-  runFrom(0);
-});
-
-btnLast.addEventListener('click', () => {
-  if (!queue.length) return;
-  const target = queue.length - 1;
-  stopAudio();
-  isPlaying = false; isPaused = false;
-  qPos = target;
-  runFrom(target);
-});
-
-btnRebuild.addEventListener('click', () => {
-  stopAudio();
-  isPlaying = false; isPaused = false;
-  showPlayIcon(false);
-  buildQueue();
-  renderLog();
-  qPos = 0;
-  setIdle('Kuyruk güncellendi');
-  setNavButtons();
-});
-
-btnReset.addEventListener('click', () => {
-  stopAudio();
-  isPlaying = false; isPaused = false;
-  queue = [];
-  qPos = 0;
-  showPlayIcon(false);
-  setIdle('Bekleniyor');
-  logBody.innerHTML = '<div class="log-empty">Kuyruk henüz oluşturulmadı.</div>';
+function doReset() {
+  stopAudio(); isPlaying = false; isPaused = false; queue = []; qPos = 0;
+  showPlayIcon(false); setIdle('Bekliyor');
+  logBody.innerHTML = '<div class="px-5 py-8 text-center text-sm text-on-surface-dim"><span class="material-symbols-outlined text-white/10 block mb-2" style="font-size:36px">queue_music</span>Kuyruk henüz oluşturulmadı.</div>';
   logCount.textContent = '—';
   document.getElementById('totalDuration').textContent = '—';
+  document.getElementById('totalDurHeader').textContent = '—';
+  document.getElementById('totalDurNav').textContent = '—';
   [btnFirst, btnPrev, btnNext, btnLast].forEach(b => b.disabled = true);
+}
+
+document.getElementById('btnReset').addEventListener('click', doReset);
+document.getElementById('btnResetCtrl').addEventListener('click', doReset);
+
+document.getElementById('btnApply').addEventListener('click', () => {
+  saveSettings();
+  toggleDrawer();
+  stopAudio(); isPlaying = false; isPaused = false;
+  const q = buildQueue();
+  renderLog(); qPos = 0;
+  runFrom(0);
 });
 
-// Update endAyah max when sura changes
-sel.addEventListener('change', () => {
-  const sura = parseInt(sel.value);
-  const s = SURAH_DATA.find(x => x[0] === sura);
-  if (s) {
-    document.getElementById('endAyah').max = s[2];
-    document.getElementById('startAyah').max = s[2];
-    document.getElementById('endAyah').value = Math.min(parseInt(document.getElementById('endAyah').value) || 3, s[2]);
-  }
-});
-
+// ── Init ──
+loadSettings();
 setNavButtons();
 </script>
 </body>
