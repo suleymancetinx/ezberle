@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ezber Programı</title>
+<style>
+  :root {
+    --bg: #0c0e14;
+    --surface: #141720;
+    --surface2: #1c2030;
+    --surface3: #222840;
+    --border: #2a3050;
+    --border2: #3a4468;
+    --accent: #5b7cfa;
+    --accent-dim: #2a3a7a;
+    --accent-glow: #5b7cfa33;
+    --text: #e4e8f5;
+    --text2: #8892b0;
+    --text3: #4a5470;
+    --green: #34d399;
+    --green-dim: #0d3320;
+    --amber: #fbbf24;
+    --red: #f87171;
+    --red-dim: #3a1010;
+    --radius: 10px;
+    --radius-lg: 16px;
+    --font: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { font-size: 16px; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font);
+    min-height: 100vh;
+    padding: 0;
+  }
+
+  /* ── Layout ── */
+  .page {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 1.5rem 1rem 3rem;
+  }
+
+  /* ── Header ── */
+  .app-header {
+    text-align: center;
+    padding: 1.5rem 0 1.25rem;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 1.5rem;
+  }
+  .app-header .icon-wrap {
+    width: 48px; height: 48px;
+    background: var(--accent-dim);
+    border: 1px solid var(--accent);
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 0.75rem;
+    font-size: 22px;
+  }
+  .app-header h1 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text);
+    letter-spacing: -0.3px;
+  }
+  .app-header p {
+    font-size: 0.82rem;
+    color: var(--text2);
+    margin-top: 4px;
+  }
+
+  /* ── Card ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1.25rem;
+    margin-bottom: 1rem;
+  }
+  .card-label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text3);
+    margin-bottom: 0.875rem;
+  }
+
+  /* ── Form ── */
+  .field { display: flex; flex-direction: column; gap: 6px; }
+  .field label { font-size: 0.78rem; color: var(--text2); }
+  select, input[type="number"] {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text);
+    font-size: 0.9rem;
+    padding: 9px 12px;
+    width: 100%;
+    outline: none;
+    transition: border-color 0.15s;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+  select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238892b0' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 32px; }
+  select:focus, input[type="number"]:focus { border-color: var(--accent); }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+
+  /* ── Now Playing ── */
+  .np-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1.25rem;
+    margin-bottom: 1rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .np-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; height: 2px;
+    background: var(--accent);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .np-card.playing::before { opacity: 1; }
+
+  .np-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 0.875rem;
+  }
+  .status-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--text3);
+    flex-shrink: 0;
+  }
+  .status-dot.playing {
+    background: var(--green);
+    box-shadow: 0 0 8px var(--green);
+    animation: blink 1.4s ease-in-out infinite;
+  }
+  .status-dot.paused { background: var(--amber); }
+  .status-dot.done { background: var(--green); }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+  .np-status-text { font-size: 0.72rem; color: var(--text2); text-transform: uppercase; letter-spacing: 0.8px; }
+
+  .np-main {
+    font-size: 1.35rem;
+    font-weight: 600;
+    color: var(--text);
+    min-height: 1.8rem;
+    margin-bottom: 6px;
+  }
+  .np-detail { font-size: 0.8rem; color: var(--text2); min-height: 1.2rem; }
+
+  .np-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 10px;
+  }
+  .badge {
+    font-size: 0.72rem;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-weight: 500;
+  }
+  .badge-rep { background: var(--green-dim); color: var(--green); border: 1px solid #1a5540; }
+  .badge-pos { background: var(--accent-dim); color: var(--accent); border: 1px solid #2a3a7a; }
+
+  /* Progress */
+  .progress-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 1rem;
+  }
+  .progress-track {
+    flex: 1;
+    height: 3px;
+    background: var(--surface3);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 2px;
+    transition: width 0.4s ease;
+    width: 0%;
+  }
+  .progress-label { font-size: 0.7rem; color: var(--text3); white-space: nowrap; }
+
+  /* ── Controls ── */
+  .controls-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1.25rem;
+    margin-bottom: 1rem;
+  }
+  .controls-main {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  .ctrl-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    border: 1px solid var(--border2);
+    background: var(--surface2);
+    color: var(--text2);
+    cursor: pointer;
+    transition: all 0.15s;
+    outline: none;
+    flex-shrink: 0;
+  }
+  .ctrl-btn:hover { background: var(--surface3); color: var(--text); border-color: var(--accent); }
+  .ctrl-btn:active { transform: scale(0.93); }
+  .ctrl-btn:disabled { opacity: 0.3; cursor: not-allowed; transform: none; }
+  .ctrl-btn.sm { width: 40px; height: 40px; }
+  .ctrl-btn.md { width: 48px; height: 48px; }
+  .ctrl-btn.lg {
+    width: 60px; height: 60px;
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+  }
+  .ctrl-btn.lg:hover { background: #4a6ae8; border-color: #4a6ae8; color: #fff; }
+  .ctrl-btn svg { pointer-events: none; }
+
+  .controls-secondary {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1rem;
+    padding-top: 0.875rem;
+    border-top: 1px solid var(--border);
+  }
+  .ctrl-text-btn {
+    background: none;
+    border: none;
+    color: var(--text3);
+    font-size: 0.78rem;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 6px;
+    transition: color 0.15s, background 0.15s;
+  }
+  .ctrl-text-btn:hover { color: var(--text2); background: var(--surface2); }
+  .ctrl-text-btn.danger:hover { color: var(--red); background: var(--red-dim); }
+
+  /* ── Queue Log ── */
+  .log-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    margin-bottom: 1rem;
+  }
+  .log-header {
+    padding: 0.875rem 1.25rem;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text3);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .log-count { color: var(--text3); font-size: 0.7rem; }
+  .log-body {
+    max-height: 200px;
+    overflow-y: auto;
+    padding: 0.5rem 0;
+  }
+  .log-body::-webkit-scrollbar { width: 4px; }
+  .log-body::-webkit-scrollbar-track { background: transparent; }
+  .log-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+  .log-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 1.25rem;
+    font-size: 0.8rem;
+    color: var(--text3);
+    transition: background 0.15s;
+  }
+  .log-item .li-index { width: 20px; text-align: right; font-size: 0.68rem; color: var(--text3); flex-shrink: 0; }
+  .log-item .li-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--text3); flex-shrink: 0; }
+  .log-item .li-text { flex: 1; }
+  .log-item .li-badge { font-size: 0.65rem; }
+  .log-item.active { background: var(--accent-dim); color: var(--text); }
+  .log-item.active .li-dot { background: var(--accent); box-shadow: 0 0 6px var(--accent); }
+  .log-item.active .li-text { color: var(--accent); }
+  .log-item.done .li-dot { background: var(--green); }
+  .log-item.done .li-text { color: var(--text3); }
+  .log-empty { padding: 1.5rem; text-align: center; color: var(--text3); font-size: 0.82rem; }
+
+  /* ── Responsive ── */
+  @media (max-width: 480px) {
+    .page { padding: 1rem 0.75rem 2.5rem; }
+    .app-header h1 { font-size: 1.25rem; }
+    .grid-3 { grid-template-columns: 1fr 1fr; }
+    .np-main { font-size: 1.15rem; }
+    .ctrl-btn.lg { width: 54px; height: 54px; }
+    .ctrl-btn.md { width: 44px; height: 44px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .status-dot.playing { animation: none; }
+    .progress-fill { transition: none; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- Header -->
+  <header class="app-header">
+    <div class="icon-wrap">🕌</div>
+    <h1>Ezber Programı</h1>
+    <p>Tekrar Yöntemiyle Ayet Ezberleme Aracı</p>
+  </header>
+
+  <!-- Settings -->
+  <div class="card">
+    <div class="card-label">Ayarlar</div>
+    <div class="field" style="margin-bottom:12px">
+      <label for="suraSelect">Sure</label>
+      <select id="suraSelect"></select>
+    </div>
+    <div class="grid-3" style="margin-bottom:12px">
+      <div class="field">
+        <label for="startAyah">Başlangıç Ayeti</label>
+        <input type="number" id="startAyah" min="1" value="1">
+      </div>
+      <div class="field">
+        <label for="endAyah">Bitiş Ayeti</label>
+        <input type="number" id="endAyah" min="1" value="3">
+      </div>
+      <div class="field">
+        <label for="reps">Tekrar (2–10)</label>
+        <input type="number" id="reps" min="2" max="10" value="3">
+      </div>
+    </div>
+  </div>
+
+  <!-- Now Playing -->
+  <div class="np-card" id="npCard">
+    <div class="np-status">
+      <div class="status-dot" id="statusDot"></div>
+      <span class="np-status-text" id="statusText">Bekleniyor</span>
+    </div>
+    <div class="np-main" id="npMain">— · —</div>
+    <div class="np-detail" id="npDetail">Sure ve ayet aralığını seçip oynat'a basın.</div>
+    <div class="np-badges" id="npBadges" style="display:none">
+      <span class="badge badge-rep" id="badgeRep"></span>
+      <span class="badge badge-pos" id="badgePos"></span>
+    </div>
+    <div class="progress-row">
+      <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+      <span class="progress-label" id="progressLabel">0 / 0</span>
+    </div>
+  </div>
+
+  <!-- Controls -->
+  <div class="controls-card">
+    <div class="controls-main">
+      <!-- Başa dön -->
+      <button class="ctrl-btn sm" id="btnFirst" title="Başa dön" disabled>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="19 20 9 12 19 4 19 20"></polygon>
+          <line x1="5" y1="19" x2="5" y2="5"></line>
+        </svg>
+      </button>
+      <!-- Geri al -->
+      <button class="ctrl-btn md" id="btnPrev" title="Önceki" disabled>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="19 20 9 12 19 4 19 20"></polygon>
+          <polygon points="5 20 5 4 5 4"></polygon>
+          <line x1="5" y1="19" x2="5" y2="5" style="display:none"></line>
+        </svg>
+      </button>
+      <!-- Oynat / Duraklat -->
+      <button class="ctrl-btn lg" id="btnPlay" title="Oynat">
+        <svg id="iconPlay" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+          <polygon points="5 3 19 12 5 21 5 3"></polygon>
+        </svg>
+        <svg id="iconPause" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" style="display:none">
+          <rect x="6" y="4" width="4" height="16"></rect>
+          <rect x="14" y="4" width="4" height="16"></rect>
+        </svg>
+      </button>
+      <!-- İleri al -->
+      <button class="ctrl-btn md" id="btnNext" title="Sonraki" disabled>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="5 4 15 12 5 20 5 4"></polygon>
+          <line x1="19" y1="5" x2="19" y2="19"></line>
+        </svg>
+      </button>
+      <!-- Sona git -->
+      <button class="ctrl-btn sm" id="btnLast" title="Sona git" disabled>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="5 4 15 12 5 20 5 4"></polygon>
+          <line x1="19" y1="5" x2="19" y2="19"></line>
+          <line x1="19" y1="4" x2="19" y2="20"></line>
+        </svg>
+      </button>
+    </div>
+    <div class="controls-secondary">
+      <button class="ctrl-text-btn" id="btnRebuild">↺ Kuyruğu Yenile</button>
+      <button class="ctrl-text-btn danger" id="btnReset">✕ Sıfırla</button>
+    </div>
+  </div>
+
+  <!-- Queue -->
+  <div class="log-card">
+    <div class="log-header">
+      <span>Çalma Kuyruğu</span>
+      <span class="log-count" id="logCount">—</span>
+    </div>
+    <div class="log-body" id="logBody">
+      <div class="log-empty">Kuyruk henüz oluşturulmadı.</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const SURAH_DATA = [
+  [1,"Al-Fatiha",7],[2,"Al-Baqara",286],[3,"Al-Imran",200],[4,"An-Nisa",176],
+  [5,"Al-Maide",120],[6,"Al-En'am",165],[7,"Al-A'raf",206],[8,"Al-Enfal",75],
+  [9,"At-Tevbe",129],[10,"Yunus",109],[11,"Hud",123],[12,"Yusuf",111],
+  [13,"Ar-Ra'd",43],[14,"İbrahim",52],[15,"Al-Hicr",99],[16,"An-Nahl",128],
+  [17,"Al-İsra",111],[18,"Al-Kehf",110],[19,"Meryem",98],[20,"Taha",135],
+  [21,"Al-Enbiya",112],[22,"Al-Hac",78],[23,"Al-Muminun",118],[24,"An-Nur",64],
+  [25,"Al-Furkan",77],[26,"Aş-Şuara",227],[27,"An-Neml",93],[28,"Al-Kasas",88],
+  [29,"Al-Ankebut",69],[30,"Ar-Rum",60],[31,"Lokman",34],[32,"As-Secde",30],
+  [33,"Al-Ahzab",73],[34,"Sebe",54],[35,"Fatır",45],[36,"Yasin",83],
+  [37,"As-Saffat",182],[38,"Sad",88],[39,"Az-Zümer",75],[40,"Gafir",85],
+  [41,"Fussilet",54],[42,"Aş-Şura",53],[43,"Az-Zuhruf",89],[44,"Ad-Duhan",59],
+  [45,"Al-Casiye",37],[46,"Al-Ahkaf",35],[47,"Muhammed",38],[48,"Al-Feth",29],
+  [49,"Al-Hucurat",18],[50,"Kaf",45],[51,"Az-Zariyat",60],[52,"At-Tur",49],
+  [53,"An-Necm",62],[54,"Al-Kamer",55],[55,"Ar-Rahman",78],[56,"Al-Vakia",96],
+  [57,"Al-Hadid",29],[58,"Al-Mücadele",22],[59,"Al-Haşr",24],[60,"Al-Mümtehine",13],
+  [61,"As-Saf",14],[62,"Al-Cuma",11],[63,"Al-Münafikun",11],[64,"At-Tegabun",18],
+  [65,"At-Talak",12],[66,"At-Tahrim",12],[67,"Al-Mülk",30],[68,"Al-Kalem",52],
+  [69,"Al-Hakka",52],[70,"Al-Mearic",44],[71,"Nuh",28],[72,"Al-Cin",28],
+  [73,"Al-Müzzemmil",20],[74,"Al-Müddessir",56],[75,"Al-Kiyame",40],[76,"Al-İnsan",31],
+  [77,"Al-Mürselat",50],[78,"An-Nebe",40],[79,"An-Naziat",46],[80,"Abese",42],
+  [81,"At-Tekvir",29],[82,"Al-İnfitar",19],[83,"Al-Mutaffifin",36],[84,"Al-İnşikak",25],
+  [85,"Al-Buruc",22],[86,"At-Tarik",17],[87,"Al-A'la",19],[88,"Al-Gaşiye",26],
+  [89,"Al-Fecr",30],[90,"Al-Beled",20],[91,"Aş-Şems",15],[92,"Al-Leyl",21],
+  [93,"Ad-Duha",11],[94,"Aş-Şerh",8],[95,"At-Tin",8],[96,"Al-Alak",19],
+  [97,"Al-Kadr",5],[98,"Al-Beyyine",8],[99,"Az-Zilzal",8],[100,"Al-Adiyat",11],
+  [101,"Al-Karia",11],[102,"At-Tekasür",8],[103,"Al-Asr",3],[104,"Al-Hümeze",9],
+  [105,"Al-Fil",5],[106,"Kureyş",4],[107,"Al-Maun",7],[108,"Al-Kevser",3],
+  [109,"Al-Kafirun",6],[110,"An-Nasr",3],[111,"Al-Mesed",5],[112,"Al-İhlas",4],
+  [113,"Al-Felak",5],[114,"An-Nas",6]
+];
+
+const BASE = 'https://webdosya.diyanet.gov.tr/kuran/kuranikerim/Sound/ar_osmanSahin/';
+
+// populate select
+const sel = document.getElementById('suraSelect');
+SURAH_DATA.forEach(([num, name, verses]) => {
+  const o = document.createElement('option');
+  o.value = num;
+  o.textContent = `${num}. ${name} (${verses} ayet)`;
+  sel.appendChild(o);
+});
+
+// state
+let queue = [];
+let qPos = 0;
+let isPlaying = false;
+let isPaused = false;
+let stopFlag = false;
+let audio = null;
+let resolvePlay = null;
+
+// elements
+const npCard = document.getElementById('npCard');
+const statusDot = document.getElementById('statusDot');
+const statusText = document.getElementById('statusText');
+const npMain = document.getElementById('npMain');
+const npDetail = document.getElementById('npDetail');
+const npBadges = document.getElementById('npBadges');
+const badgeRep = document.getElementById('badgeRep');
+const badgePos = document.getElementById('badgePos');
+const progressFill = document.getElementById('progressFill');
+const progressLabel = document.getElementById('progressLabel');
+const logBody = document.getElementById('logBody');
+const logCount = document.getElementById('logCount');
+
+const btnPlay = document.getElementById('btnPlay');
+const iconPlay = document.getElementById('iconPlay');
+const iconPause = document.getElementById('iconPause');
+const btnPrev = document.getElementById('btnPrev');
+const btnNext = document.getElementById('btnNext');
+const btnFirst = document.getElementById('btnFirst');
+const btnLast = document.getElementById('btnLast');
+const btnReset = document.getElementById('btnReset');
+const btnRebuild = document.getElementById('btnRebuild');
+
+function getSuraName(num) {
+  const s = SURAH_DATA.find(x => x[0] === num);
+  return s ? s[1] : `${num}. Sure`;
+}
+
+function buildQueue() {
+  const sura = parseInt(sel.value);
+  let start = parseInt(document.getElementById('startAyah').value) || 1;
+  let end = parseInt(document.getElementById('endAyah').value) || 1;
+  const reps = Math.min(10, Math.max(2, parseInt(document.getElementById('reps').value) || 3));
+  const suraInfo = SURAH_DATA.find(x => x[0] === sura);
+  const maxV = suraInfo ? suraInfo[2] : 999;
+  start = Math.max(1, Math.min(start, maxV));
+  end = Math.max(start, Math.min(end, maxV));
+  document.getElementById('startAyah').value = start;
+  document.getElementById('endAyah').value = end;
+
+  queue = [];
+  for (let pivot = start; pivot <= end; pivot++) {
+    for (let r = 0; r < reps; r++) {
+      for (let a = start; a <= pivot; a++) {
+        queue.push({ sura, ayah: a, rep: r + 1, totalReps: reps, pivot, suraName: getSuraName(sura) });
+      }
+    }
+  }
+  return queue;
+}
+
+// Group queue items for log display
+function getGroups() {
+  const groups = [];
+  let cur = null;
+  queue.forEach((item, i) => {
+    const key = `${item.pivot}-${item.rep}`;
+    if (!cur || cur.key !== key) {
+      cur = { key, pivot: item.pivot, rep: item.rep, totalReps: item.totalReps, startIdx: i, endIdx: i, sura: item.sura, suraName: item.suraName };
+      groups.push(cur);
+    } else {
+      cur.endIdx = i;
+    }
+  });
+  return groups;
+}
+
+function renderLog() {
+  if (!queue.length) {
+    logBody.innerHTML = '<div class="log-empty">Kuyruk henüz oluşturulmadı.</div>';
+    logCount.textContent = '—';
+    return;
+  }
+  const groups = getGroups();
+  logCount.textContent = `${groups.length} grup · ${queue.length} ses`;
+  logBody.innerHTML = groups.map((g, gi) => {
+    const startAyah = queue[g.startIdx].ayah;
+    const endAyah = queue[g.endIdx].ayah;
+    const rangeStr = startAyah === endAyah ? `Ayet ${startAyah}` : `Ayet ${startAyah}–${endAyah}`;
+    return `<div class="log-item" id="grp${gi}">
+      <span class="li-index">${gi + 1}</span>
+      <span class="li-dot"></span>
+      <span class="li-text">${g.suraName} · ${rangeStr}</span>
+      <span class="badge badge-rep li-badge" style="font-size:0.65rem">${g.rep}/${g.totalReps}</span>
+    </div>`;
+  }).join('');
+}
+
+function getGroupForPos(pos) {
+  const groups = getGroups();
+  for (let i = 0; i < groups.length; i++) {
+    if (pos >= groups[i].startIdx && pos <= groups[i].endIdx) return i;
+  }
+  return -1;
+}
+
+function updateLog(pos) {
+  const groups = getGroups();
+  const gi = getGroupForPos(pos);
+  document.querySelectorAll('.log-item').forEach((el, i) => {
+    el.classList.remove('active', 'done');
+    if (i < gi) el.classList.add('done');
+    else if (i === gi) {
+      el.classList.add('active');
+      el.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    }
+  });
+}
+
+function updateNP(item, pos) {
+  npCard.classList.add('playing');
+  statusDot.className = 'status-dot playing';
+  statusText.textContent = 'Çalıyor';
+  npMain.textContent = `${item.suraName}  ·  ${item.ayah}. Ayet`;
+  const groups = getGroups();
+  const gi = getGroupForPos(pos);
+  if (gi >= 0) {
+    const g = groups[gi];
+    const ayetler = queue.slice(g.startIdx, g.endIdx + 1).map(x => x.ayah);
+    npDetail.textContent = `Grup: ${item.sura}:${ayetler.join(', ')}`;
+  }
+  npBadges.style.display = 'flex';
+  badgeRep.textContent = `${item.rep}. tekrar / ${item.totalReps}`;
+  badgePos.textContent = `${pos + 1} / ${queue.length}`;
+  const pct = queue.length > 1 ? Math.round((pos / (queue.length - 1)) * 100) : 100;
+  progressFill.style.width = pct + '%';
+  progressLabel.textContent = `${pos + 1} / ${queue.length}`;
+  setNavButtons();
+}
+
+function setIdle(msg = 'Bekleniyor') {
+  npCard.classList.remove('playing');
+  statusDot.className = msg === 'Tamamlandı' ? 'status-dot done' : 'status-dot';
+  statusText.textContent = msg;
+  npMain.textContent = '— · —';
+  npDetail.textContent = 'Sure ve ayet aralığını seçip oynat\'a basın.';
+  npBadges.style.display = 'none';
+  progressFill.style.width = msg === 'Tamamlandı' ? '100%' : '0%';
+  progressLabel.textContent = '0 / 0';
+}
+
+function setNavButtons() {
+  btnFirst.disabled = qPos === 0 || !queue.length;
+  btnPrev.disabled = qPos === 0 || !queue.length;
+  btnNext.disabled = qPos >= queue.length - 1 || !queue.length;
+  btnLast.disabled = qPos >= queue.length - 1 || !queue.length;
+}
+
+function showPlayIcon(playing) {
+  if (playing) { iconPlay.style.display = 'none'; iconPause.style.display = ''; }
+  else { iconPlay.style.display = ''; iconPause.style.display = 'none'; }
+}
+
+function playFile(url) {
+  return new Promise(resolve => {
+    if (audio) { audio.pause(); audio.src = ''; }
+    audio = new Audio(url);
+    resolvePlay = resolve;
+    audio.onended = () => resolve('ended');
+    audio.onerror = () => resolve('error');
+    audio.play().catch(() => resolve('error'));
+  });
+}
+
+function delay(ms) {
+  return new Promise(resolve => {
+    const start = Date.now();
+    const check = setInterval(() => {
+      if (stopFlag) { clearInterval(check); resolve('stop'); }
+      else if (Date.now() - start >= ms) { clearInterval(check); resolve('ok'); }
+    }, 50);
+  });
+}
+
+async function runFrom(startPos) {
+  isPlaying = true;
+  stopFlag = false;
+  showPlayIcon(true);
+  btnPlay.disabled = false;
+
+  for (let i = startPos; i < queue.length; i++) {
+    if (stopFlag) break;
+    qPos = i;
+    const item = queue[i];
+    updateNP(item, i);
+    updateLog(i);
+
+    while (isPaused) {
+      await new Promise(r => setTimeout(r, 100));
+      if (stopFlag) break;
+    }
+    if (stopFlag) break;
+
+    const url = `${BASE}${item.sura}_${item.ayah}.mp3`;
+    const res = await playFile(url);
+    if (stopFlag || res === 'stop') break;
+
+    if (i < queue.length - 1) {
+      const d = await delay(1500);
+      if (stopFlag || d === 'stop') break;
+    }
+  }
+
+  if (!stopFlag) {
+    isPlaying = false;
+    isPaused = false;
+    showPlayIcon(false);
+    statusDot.className = 'status-dot done';
+    statusText.textContent = 'Tamamlandı';
+    npCard.classList.remove('playing');
+    progressFill.style.width = '100%';
+    setNavButtons();
+    const logItems = document.querySelectorAll('.log-item');
+    logItems.forEach(el => { el.classList.remove('active'); el.classList.add('done'); });
+  }
+}
+
+function stopAudio() {
+  stopFlag = true;
+  if (audio) { audio.pause(); audio.src = ''; audio = null; }
+  if (resolvePlay) { resolvePlay('stop'); resolvePlay = null; }
+}
+
+// ── Button handlers ──
+
+btnPlay.addEventListener('click', () => {
+  if (isPaused) {
+    isPaused = false;
+    if (audio) audio.play();
+    showPlayIcon(true);
+    statusDot.className = 'status-dot playing';
+    statusText.textContent = 'Çalıyor';
+    npCard.classList.add('playing');
+    return;
+  }
+  if (isPlaying) {
+    isPaused = true;
+    if (audio) audio.pause();
+    showPlayIcon(false);
+    statusDot.className = 'status-dot paused';
+    statusText.textContent = 'Duraklatıldı';
+    npCard.classList.remove('playing');
+    return;
+  }
+  // Start fresh
+  const q = buildQueue();
+  if (!q.length) return;
+  renderLog();
+  qPos = 0;
+  runFrom(0);
+});
+
+btnPrev.addEventListener('click', () => {
+  if (!queue.length) return;
+  const target = Math.max(0, qPos - 1);
+  stopAudio();
+  isPlaying = false; isPaused = false;
+  qPos = target;
+  runFrom(target);
+});
+
+btnNext.addEventListener('click', () => {
+  if (!queue.length) return;
+  const target = Math.min(queue.length - 1, qPos + 1);
+  stopAudio();
+  isPlaying = false; isPaused = false;
+  qPos = target;
+  runFrom(target);
+});
+
+btnFirst.addEventListener('click', () => {
+  if (!queue.length) return;
+  stopAudio();
+  isPlaying = false; isPaused = false;
+  qPos = 0;
+  runFrom(0);
+});
+
+btnLast.addEventListener('click', () => {
+  if (!queue.length) return;
+  const target = queue.length - 1;
+  stopAudio();
+  isPlaying = false; isPaused = false;
+  qPos = target;
+  runFrom(target);
+});
+
+btnRebuild.addEventListener('click', () => {
+  stopAudio();
+  isPlaying = false; isPaused = false;
+  showPlayIcon(false);
+  buildQueue();
+  renderLog();
+  qPos = 0;
+  setIdle('Kuyruk güncellendi');
+  setNavButtons();
+});
+
+btnReset.addEventListener('click', () => {
+  stopAudio();
+  isPlaying = false; isPaused = false;
+  queue = [];
+  qPos = 0;
+  showPlayIcon(false);
+  setIdle('Bekleniyor');
+  logBody.innerHTML = '<div class="log-empty">Kuyruk henüz oluşturulmadı.</div>';
+  logCount.textContent = '—';
+  [btnFirst, btnPrev, btnNext, btnLast].forEach(b => b.disabled = true);
+});
+
+// Update endAyah max when sura changes
+sel.addEventListener('change', () => {
+  const sura = parseInt(sel.value);
+  const s = SURAH_DATA.find(x => x[0] === sura);
+  if (s) {
+    document.getElementById('endAyah').max = s[2];
+    document.getElementById('startAyah').max = s[2];
+    document.getElementById('endAyah').value = Math.min(parseInt(document.getElementById('endAyah').value) || 3, s[2]);
+  }
+});
+
+setNavButtons();
+</script>
+</body>
+</html>
