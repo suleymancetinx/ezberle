@@ -375,6 +375,10 @@
       <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
       <span class="progress-label" id="progressLabel">0 / 0</span>
     </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">
+      <span style="font-size:0.7rem;color:var(--text3)">Tahmini Toplam Sure</span>
+      <span style="font-size:0.82rem;font-weight:600;color:var(--text2);font-family:monospace;letter-spacing:1px" id="totalDuration">—</span>
+    </div>
   </div>
 
   <!-- Controls -->
@@ -545,6 +549,23 @@ function buildQueue() {
   return queue;
 }
 
+function fmtDuration(secs) {
+  const h = Math.floor(secs / 3600);
+  const m = Math.floor((secs % 3600) / 60);
+  const s = Math.floor(secs % 60);
+  return [h, m, s].map(v => String(v).padStart(2, '0')).join(':');
+}
+
+function updateTotalDuration() {
+  const el = document.getElementById('totalDuration');
+  if (!queue.length) { el.textContent = '—'; return; }
+  // Average ayet ~8s, gap 1.5s between each item
+  const avgAyet = 8;
+  const gap = 1.5;
+  const totalSecs = queue.length * avgAyet + Math.max(0, queue.length - 1) * gap;
+  el.textContent = fmtDuration(totalSecs);
+}
+
 // Group queue items for log display
 function getGroups() {
   const groups = [];
@@ -562,6 +583,7 @@ function getGroups() {
 }
 
 function renderLog() {
+  updateTotalDuration();
   if (!queue.length) {
     logBody.innerHTML = '<div class="log-empty">Kuyruk henüz oluşturulmadı.</div>';
     logCount.textContent = '—';
@@ -654,6 +676,16 @@ function playFile(url) {
     resolvePlay = resolve;
     audio.onended = () => resolve('ended');
     audio.onerror = () => resolve('error');
+    audio.onloadedmetadata = () => {
+      if (audio.duration && !isNaN(audio.duration)) {
+        const remaining = queue.length - qPos;
+        const gapSecs = Math.max(0, remaining - 1) * 1.5;
+        const estRemaining = remaining * audio.duration + gapSecs;
+        const elapsed = qPos * (audio.duration + 1.5);
+        const totalEst = elapsed + estRemaining;
+        document.getElementById('totalDuration').textContent = fmtDuration(totalEst);
+      }
+    };
     audio.play().catch(() => resolve('error'));
   });
 }
@@ -801,6 +833,7 @@ btnReset.addEventListener('click', () => {
   setIdle('Bekleniyor');
   logBody.innerHTML = '<div class="log-empty">Kuyruk henüz oluşturulmadı.</div>';
   logCount.textContent = '—';
+  document.getElementById('totalDuration').textContent = '—';
   [btnFirst, btnPrev, btnNext, btnLast].forEach(b => b.disabled = true);
 });
 
